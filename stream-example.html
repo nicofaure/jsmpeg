@@ -33,7 +33,7 @@
 	<script type="text/javascript" src="jsmpg.js"></script>
 	<script type="text/javascript">
 		// Setup the WebSocket connection and start the player
-		var client = new WebSocket( 'ws://example.com:8084/' );
+		var client = new WebSocket( 'ws://localhost:8084/' );
 
 		var canvas = document.getElementById('videoCanvas');
 		var player = new jsmpeg(client, {canvas:canvas});

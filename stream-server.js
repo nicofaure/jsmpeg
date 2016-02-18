@@ -1,3 +1,8 @@
+var redis = require("redis"), publisher = redis.createClient(), subscriber = redis.createClient();
+subscriber.subscribe("channel0");
+subscriber.on("message", function(channel, data) {
+	socketServer.broadcast(data.toString('base64'), {binary:true});
+});
 
 if( process.argv.length < 3 ) {
 	console.log(
@@ -33,10 +38,13 @@ socketServer.on('connection', function(socket) {
 	});
 });
 
+
+
 socketServer.broadcast = function(data, opts) {
 	for( var i in this.clients ) {
 		if (this.clients[i].readyState == 1) {
-			this.clients[i].send(data, opts);
+			var buf= new Buffer(data, 'base64');
+			this.clients[i].send(buf, {binary:true});
 		}
 		else {
 			console.log( 'Error: Client ('+i+') not connected.' );
@@ -58,7 +66,7 @@ var streamServer = require('http').createServer( function(request, response) {
 			':' + request.socket.remotePort + ' size: ' + width + 'x' + height
 		);
 		request.on('data', function(data){
-			socketServer.broadcast(data, {binary:true});
+			publisher.publish("channel0",data.toString('base64'));
 		});
 	}
 	else {
