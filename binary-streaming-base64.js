@@ -2,12 +2,23 @@ var express = require('express');
 var server = express();
 var BinaryServer = require('binaryjs').BinaryServer;
 var binaryserver = new BinaryServer({server: server, path: '/binary-endpoint', port:3702});
+var binaryVideoServer = new BinaryServer({server: server, path: '/video-endpoint', port:4702});
 var base64 = require('base64-stream');
 var Stream = require('stream');
-var redis = require("redis");
 
-var publisher = redis.createClient(options);
-var subscriber = redis.createClient(options);
+
+binaryVideoServer.on('connection', function(client){
+  console.log('Binary Server connection started');
+
+  client.on('stream', function(stream, meta) {
+    console.log('>>>Incoming Video stream');
+    console.log(meta);
+    stream.on('end', function() {
+      console.log('||| Video stream ended');
+    });
+    
+  }); //client.on
+}); //binaryserver.on
 
 
 binaryserver.on('connection', function(client){
@@ -23,10 +34,10 @@ binaryserver.on('connection', function(client){
         if(otherClient != client){
           var send = otherClient.createStream(meta);
           stream.on("data",function(chunk){
-            console.log(chunk.toString('base64'));
+            console.log(chunk.toString('utf8'));
             var bufferStream = new Stream();
             bufferStream.pipe(send);
-            bufferStream.emit('data',new Buffer(chunk.toString('base64'),'base64'));
+            bufferStream.emit('data',new Buffer(chunk.toString()));
 
           });
 
