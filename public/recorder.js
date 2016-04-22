@@ -39,25 +39,12 @@
         if(!recording) return;
         
         var left = e.inputBuffer.getChannelData(0);
-        
+        console.log(left);
         //ws.send(bufferAsString);
         window.Stream.write(left);
 
         //testSound(left);
       }
-
-      var video = document.querySelector('video');
-      video.src = window.URL.createObjectURL(e);
-      video.onprogress = function(e) {
-          console.log(e.dataset);
-      };
-
-      setInterval(function(){
-        console.log(video);
-
-      },10);
-
-
 
       function testSound(buff) {
         console.log(buff);

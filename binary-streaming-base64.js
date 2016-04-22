@@ -12,7 +12,9 @@ binaryVideoServer.on('connection', function(client){
 
   client.on('stream', function(stream, meta) {
     console.log('>>>Incoming Video stream');
-    console.log(meta);
+    console.log(stream);
+    var responseStream = client.createStream('fromserver');
+    stream.pipe(responseStream);
     stream.on('end', function() {
       console.log('||| Video stream ended');
     });
