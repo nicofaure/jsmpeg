@@ -1,4 +1,5 @@
 (function(window) {
+  console.log("START!")
   var client = new BinaryClient('ws://localhost:3702/binary-endpoint');
 
   client.on('open', function() {
