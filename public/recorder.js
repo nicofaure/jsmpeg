@@ -10,7 +10,7 @@
     navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
     if (navigator.getUserMedia) {
-      navigator.getUserMedia({audio:true, video:true}, success, function(e) {
+      navigator.getUserMedia({audio:true}, success, function(e) {
         alert('Error capturing audio.');
       });
     } else alert('getUserMedia not supported in this browser.');
@@ -33,8 +33,8 @@
       // the sample rate is in context.sampleRate
       audioInput = context.createMediaStreamSource(e);
 
-      var bufferSize = 2048;
-      recorder = context.createScriptProcessor(bufferSize, 1, 1);
+      var bufferSize = 4096;
+      recorder = context.createScriptProcessor(bufferSize, 2, 2);
 
       recorder.onaudioprocess = function(e){
         if(!recording) return;
@@ -50,7 +50,7 @@
       function testSound(buff) {
         console.log(buff);
         var node = context.createBufferSource()
-            , buffer = context.createBuffer(1, 2048, context.sampleRate)
+            , buffer = context.createBuffer(1, bufferSize, context.sampleRate)
             , data = buffer.getChannelData(0);
         var src = context.createBufferSource();
         src.buffer = context.createBuffer(1, buff.byteLength, context.sampleRate)

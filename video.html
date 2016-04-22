@@ -14,7 +14,7 @@
                     grabRate: 66.7,
                     canvasWidth: 200,
                     canvasHeight: 160,
-                    videoSocketClient: 'ws://localhost:4706/video-client'
+                    videoSocketClient: 'ws://10.10.33.193:4706/video-client'
                 };
 
                 var senderEl = document.getElementById('sender');
@@ -81,7 +81,7 @@
 
     function testSound(buff) {
         var node = context.createBufferSource()
-            , buffer = context.createBuffer(1, 2048, context.sampleRate)
+            , buffer = context.createBuffer(1, 4096, context.sampleRate)
             , data = buffer.getChannelData(0);
         var src = context.createBufferSource();
         src.buffer = context.createBuffer(1, buff.byteLength, context.sampleRate)
@@ -96,7 +96,7 @@
         node.start(0);
    
     }
-    var client = BinaryClient('ws://localhost:4703/audio-client');
+    var client = BinaryClient('ws://10.10.33.193:4703/audio-client');
     console.log("OK");
     client.on('stream', function (stream) {
                   soundController.nextTime = 0;
