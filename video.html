@@ -14,7 +14,7 @@
                     grabRate: 66.7,
                     canvasWidth: 200,
                     canvasHeight: 160,
-                    socketSrv: 'ws://localhost:4702/video-endpoint'
+                    videoSocketClient: 'ws://localhost:4706/video-client'
                 };
 
                 var senderEl = document.getElementById('sender');
@@ -28,7 +28,7 @@
                 var receiverPos = 0;
                 var transferRate = Math.round(((1000 / settings.grabRate) * receiverDataLength / 1024), 2);
 
-                var client = new BinaryClient(settings.socketSrv);
+                var videoClient = new BinaryClient(settings.videoSocketClient);
                 var stream;
 
                 var imageFrame = receiverContext.getImageData(0, 0, settings.canvasWidth, settings.canvasHeight);
@@ -51,19 +51,7 @@
                 document.getElementById('message').innerHTML = 'Sending: ' + transferRate + ' KB / Sec<br />';
                 document.getElementById('message').innerHTML += 'Receiving: ' + transferRate + ' KB / Sec';
 
-                // the stream is ready
-
-                client.on('open', function (s) {
-                    console.log("socket open");
-                    stream = client.createStream(s, 'toserver');
-
-                    // data coming from the server...
-                    // we will draw it into the receiver canvas
-                });
-
-                client.on('stream', function (s, meta) {
-
-                    if (meta === 'fromserver') {
+                videoClient.on('stream', function (s, meta) {
                         s.on('data', function (data) {
 
                             // data is from the type 'ArrayBuffer'
@@ -81,41 +69,7 @@
                             }
 
                         });
-
-                    }
                 });
-
-                // gets called in an certain interval and grabs the current video frame
-                // and draws it into a canvas
-
-                var grabLoop = function () {
-                    try {
-                        senderContext.drawImage(videoEl, 0, 0, settings.canvasWidth, settings.canvasHeight);
-                    } catch (e) {}
-
-                    var imageData = senderContext.getImageData(0, 0, settings.canvasWidth, settings.canvasHeight);
-                    if (typeof stream !== 'undefined') {
-                        stream.write(imageData.data);
-                    }
-                    setTimeout(grabLoop, settings.grabRate);
-                };
-
-                // gets called as soon we have access to the camera..
-
-                var gUsuccess = function (stream) {
-                    videoEl.src = window.URL.createObjectURL(stream);
-                    videoEl.play();
-                    console.log('success');
-                    setTimeout(grabLoop, settings.grabRate);
-                };
-
-                // no camera access...
-
-                var gUfail = function () {
-                    console.log('no webcam access :-(');
-                };
-
-                userMedia({video: true}, gUsuccess, gUfail);
             });
 
         })(document);
@@ -142,7 +96,7 @@
         node.start(0);
    
     }
-    var client = BinaryClient('ws://localhost:4703/audio-endpoint');
+    var client = BinaryClient('ws://localhost:4703/audio-client');
     console.log("OK");
     client.on('stream', function (stream) {
                   soundController.nextTime = 0;

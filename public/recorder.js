@@ -1,6 +1,6 @@
 (function(window) {
   console.log("START!")
-  var client = new BinaryClient('ws://localhost:3702/binary-endpoint');
+  var client = new BinaryClient('ws://localhost:4702/audio-server');
 
   client.on('open', function() {
     window.Stream = client.createStream();
