@@ -11,10 +11,10 @@
             document.addEventListener('DOMContentLoaded', function () {
 
                 var settings = {
-                    grabRate: 66.7,
-                    canvasWidth: 200,
-                    canvasHeight: 160,
-                    videoSocketClient: 'ws://10.10.33.193:4706/video-client'
+                    grabRate: 1000/30,
+                    canvasWidth: 400,
+                    canvasHeight: 320,
+                    videoSocketClient: 'ws://192.168.0.13:4706/video-client'
                 };
 
                 var senderEl = document.getElementById('sender');
@@ -58,16 +58,15 @@
                             // we need to build a Uint8Array out of it
                             // to be able to access the actual data
                             var dataArr = new Uint8Array(data);
-
                             for (var i = 0, len = dataArr.length; i < len; i++) {
                                 imageFrame.data[receiverPos] = dataArr[i];
                                 receiverPos++;
                                 if (receiverPos % receiverDataLength === 0) {
                                     receiverPos = 0;
-                                    receiverContext.putImageData(imageFrame, 0, 0);
+                                    
                                 }
                             }
-
+                            receiverContext.putImageData(imageFrame, 0, 0);
                         });
                 });
             });
@@ -96,7 +95,7 @@
         node.start(0);
    
     }
-    var client = BinaryClient('ws://10.10.33.193:4703/audio-client');
+    var client = BinaryClient('ws://192.168.0.13:4703/audio-client');
     console.log("OK");
     client.on('stream', function (stream) {
                   soundController.nextTime = 0;

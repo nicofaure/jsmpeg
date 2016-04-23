@@ -11,9 +11,9 @@
             document.addEventListener('DOMContentLoaded', function () {
 
                 var settings = {
-                    grabRate: 66.7,
-                    canvasWidth: 200,
-                    canvasHeight: 160,
+                    grabRate: 1,
+                    canvasWidth: 400,
+                    canvasHeight: 320,
                     videoSocketSrv: 'ws://localhost:4705/video-server'
                 };
 
@@ -65,8 +65,10 @@
                     var imageData = senderContext.getImageData(0, 0, settings.canvasWidth, settings.canvasHeight);
                     if (typeof stream !== 'undefined') {
                         stream.write(imageData.data);
+                    }else{
+                        console.log("algo paso");
                     }
-                    setTimeout(grabLoop, settings.grabRate);
+                    setTimeout(grabLoop, 180);
                 };
 
                 // gets called as soon we have access to the camera..
@@ -75,7 +77,7 @@
                     videoEl.src = window.URL.createObjectURL(stream);
                     videoEl.play();
                     console.log('success');
-                    setTimeout(grabLoop, settings.grabRate);
+                    setTimeout(grabLoop, 180);
                 };
 
                 // no camera access...
