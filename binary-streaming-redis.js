@@ -52,15 +52,15 @@ videoServer.on('connection', function(client){
 videoClient.on('connection', function(client) {
   var channelName = getChannelNameFromUrl(client._socket.upgradeReq.url);
   if(videoBuffers[channelName] !== undefined){
-    var responseStream = client.createStream('fromserver');
-    var bufferStream = new Stream();
-    bufferStream.pipe(responseStream);
-    videoBuffers[channelName].push(bufferStream);
+    videoBuffers[channelName].push(client.createStream('fromserver'));
   }
 
   videoSubscriber.on("message", function(channel, data) {
     for(var i = 0;i < videoBuffers[channel].length;i++){
-      videoBuffers[channel][i].emit('data',new Buffer(data,'base64'));
+      //var responseStream = videoBuffers[channel][i].createStream('fromserver');
+      var bufferStream = new Stream();
+      bufferStream.pipe(videoBuffers[channel][i]);
+      bufferStream.emit('data',new Buffer(data,'base64'));
     }
   }); 
 });
