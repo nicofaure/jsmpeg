@@ -70,7 +70,7 @@
                     }else{
                         console.log("algo paso");
                     }
-                    setTimeout(grabLoop, 180);
+                    setTimeout(grabLoop, 200);
                 };
 
                 // gets called as soon we have access to the camera..
@@ -79,7 +79,7 @@
                     videoEl.src = window.URL.createObjectURL(stream);
                     videoEl.play();
                     console.log('success');
-                    setTimeout(grabLoop, 180);
+                    setTimeout(grabLoop, 200);
                 };
 
                 // no camera access...

@@ -22,6 +22,8 @@ var SERVER_PORT = 3701;
 
 var subscribers = {};
 
+process.setMaxListeners(0);
+
 audioSubscriber.subscribe("audio");
 //videoSubscriber.subscribe("video");
 
@@ -49,15 +51,15 @@ videoServer.on('connection', function(client){
 videoClient.on('connection', function(client) {
   var channelName = getChannelNameFromUrl(client._socket.upgradeReq.url);
   if(subscribers[channelName] !== undefined){
-    subscribers[channelName].push(client);
+    var responseStream = client.createStream('fromserver');
+    var bufferStream = new Stream();
+    bufferStream.pipe(responseStream);
+    subscribers[channelName].push(bufferStream);
   }
 
   videoSubscriber.on("message", function(channel, data) {
     for(var i = 0;i < subscribers[channel].length;i++){
-      var responseStream = subscribers[channel][i].createStream('fromserver');
-      var bufferStream = new Stream();
-      bufferStream.pipe(responseStream);
-      bufferStream.emit('data',new Buffer(data,'base64'));
+      subscribers[channel][i].emit('data',new Buffer(data,'base64'));
     }
   }); 
 });
