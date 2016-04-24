@@ -97,7 +97,7 @@
         node.start(0);
    
     }
-    var client = BinaryClient('ws://localhost:4703/audio-client');
+    var client = BinaryClient('ws://localhost:4703/audio-client?channel=' + channel);
     console.log("OK");
     client.on('stream', function (stream) {
                   soundController.nextTime = 0;

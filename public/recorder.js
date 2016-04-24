@@ -3,7 +3,8 @@
   var client = new BinaryClient('ws://localhost:4702/audio-server');
 
   client.on('open', function() {
-    window.Stream = client.createStream();
+    var channel = getParameterByName('channel');
+    window.Stream = client.createStream(channel);
 
     if (!navigator.getUserMedia)
       navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||

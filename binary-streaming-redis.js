@@ -20,11 +20,12 @@ var videoSubscriber = redis.createClient();
 
 var SERVER_PORT = 3701;
 
-var subscribers = {};
+var videoBuffers = {};
+var audioBuffers = {};
 
 process.setMaxListeners(0);
 
-audioSubscriber.subscribe("audio");
+//audioSubscriber.subscribe("audio");
 //videoSubscriber.subscribe("video");
 
 //GET VIDEO FROM BROWSER AND PUBLISH TO REDIS
@@ -34,8 +35,8 @@ videoServer.on('connection', function(client){
   client.on('stream', function(stream, channelName) {
     console.log('>>>Incoming Video stream');
     stream.on("data",function(chunk){
-      if(subscribers[channelName] === undefined){
-        subscribers[channelName] = [];
+      if(videoBuffers[channelName] === undefined){
+        videoBuffers[channelName] = [];
         videoSubscriber.subscribe(channelName);
       }
       videoPublisher.publish(channelName,chunk.toString('base64'));
@@ -50,16 +51,16 @@ videoServer.on('connection', function(client){
 //GET VIDEO FROM REDIS AND EMIT TO CLIENT BROWSER
 videoClient.on('connection', function(client) {
   var channelName = getChannelNameFromUrl(client._socket.upgradeReq.url);
-  if(subscribers[channelName] !== undefined){
+  if(videoBuffers[channelName] !== undefined){
     var responseStream = client.createStream('fromserver');
     var bufferStream = new Stream();
     bufferStream.pipe(responseStream);
-    subscribers[channelName].push(bufferStream);
+    videoBuffers[channelName].push(bufferStream);
   }
 
   videoSubscriber.on("message", function(channel, data) {
-    for(var i = 0;i < subscribers[channel].length;i++){
-      subscribers[channel][i].emit('data',new Buffer(data,'base64'));
+    for(var i = 0;i < videoBuffers[channel].length;i++){
+      videoBuffers[channel][i].emit('data',new Buffer(data,'base64'));
     }
   }); 
 });
@@ -68,10 +69,14 @@ videoClient.on('connection', function(client) {
 audioServer.on('connection', function(client){
   console.log('Binary Server connection started');
 
-  client.on('stream', function(stream, meta) {
+  client.on('stream', function(stream, channelName) {
     console.log('>>>Incoming audio stream');
     stream.on("data",function(chunk){
-      audioPublisher.publish("audio",chunk.toString('base64'));
+      if(audioBuffers[channelName] === undefined){
+        audioBuffers[channelName] = [];
+        audioSubscriber.subscribe(channelName);
+      }
+      audioPublisher.publish(channelName,chunk.toString('base64'));
     }); 
 
     stream.on('end', function() {
@@ -82,14 +87,17 @@ audioServer.on('connection', function(client){
 
 audioClient.on('connection', function(client){
   console.log(">>>Incoming audio client");
-  audioSubscriber.on("message", function(channel, data) {
-    console.log("data received");
-
-    var send = client.createStream();
+  var channelName = getChannelNameFromUrl(client._socket.upgradeReq.url);
+  if(audioBuffers[channelName] !== undefined){
+    var responseStream = client.createStream('fromserver');
     var bufferStream = new Stream();
-    bufferStream.pipe(send);
-    bufferStream.emit('data',new Buffer(data,'base64'));
-    
+    bufferStream.pipe(responseStream);
+    audioBuffers[channelName].push(bufferStream);
+  }
+  audioSubscriber.on("message", function(channel, data) {
+    for(var i = 0;i < audioBuffers[channel].length;i++){
+      audioBuffers[channel][i].emit('data',new Buffer(data,'base64'));
+    }
   }); 
 
 });
