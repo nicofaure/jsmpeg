@@ -20,17 +20,23 @@ var videoSubscriber = redis.createClient();
 
 var SERVER_PORT = 3701;
 
+var subscribers = {};
+
 audioSubscriber.subscribe("audio");
-videoSubscriber.subscribe("video");
+//videoSubscriber.subscribe("video");
 
 //GET VIDEO FROM BROWSER AND PUBLISH TO REDIS
 videoServer.on('connection', function(client){
   console.log('Binary Server connection started');
 
-  client.on('stream', function(stream, meta) {
+  client.on('stream', function(stream, channelName) {
     console.log('>>>Incoming Video stream');
     stream.on("data",function(chunk){
-      videoPublisher.publish("video",chunk.toString('base64'));
+      if(subscribers[channelName] === undefined){
+        subscribers[channelName] = [];
+        videoSubscriber.subscribe(channelName);
+      }
+      videoPublisher.publish(channelName,chunk.toString('base64'));
     });
 
     stream.on('end', function() {
@@ -39,14 +45,21 @@ videoServer.on('connection', function(client){
   });
 });
 
-//GET VIDEO FROM REDIS AND PUBLISH TO CLIENT BROWSER
+//GET VIDEO FROM REDIS AND EMIT TO CLIENT BROWSER
 videoClient.on('connection', function(client) {
- videoSubscriber.on("message", function(channel, data) {
-      var responseStream = client.createStream('fromserver');
+  var channelName = getChannelNameFromUrl(client._socket.upgradeReq.url);
+  if(subscribers[channelName] !== undefined){
+    subscribers[channelName].push(client);
+  }
+
+  videoSubscriber.on("message", function(channel, data) {
+    for(var i = 0;i < subscribers[channel].length;i++){
+      var responseStream = subscribers[channel][i].createStream('fromserver');
       var bufferStream = new Stream();
       bufferStream.pipe(responseStream);
       bufferStream.emit('data',new Buffer(data,'base64'));
-    }); 
+    }
+  }); 
 });
 
 
@@ -80,3 +93,7 @@ audioClient.on('connection', function(client){
 });
 
 server.listen(SERVER_PORT);
+
+function getChannelNameFromUrl(url){
+  return url.split('?')[1].split('=')[1];
+}

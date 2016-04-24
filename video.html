@@ -3,7 +3,7 @@
 <head>
     <title>Webcam Binary.JS Demo</title>
     <script src="https://cdn.jsdelivr.net/binaryjs/0.2.1/binary.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.7.1/modernizr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.7.1/modernizr.min.js"></script>
     <script>
 
         (function (document) {
@@ -14,8 +14,10 @@
                     grabRate: 1000/30,
                     canvasWidth: 400,
                     canvasHeight: 320,
-                    videoSocketClient: 'ws://192.168.0.13:4706/video-client'
+                    videoSocketClient: 'ws://localhost:4706/video-client'
                 };
+
+                var channel = getParameterByName('channel');
 
                 var senderEl = document.getElementById('sender');
                 var receiverEl = document.getElementById('receiver');
@@ -28,7 +30,7 @@
                 var receiverPos = 0;
                 var transferRate = Math.round(((1000 / settings.grabRate) * receiverDataLength / 1024), 2);
 
-                var videoClient = new BinaryClient(settings.videoSocketClient);
+                var videoClient = new BinaryClient(settings.videoSocketClient + '?channel=' + channel);
                 var stream;
 
                 var imageFrame = receiverContext.getImageData(0, 0, settings.canvasWidth, settings.canvasHeight);
@@ -95,7 +97,7 @@
         node.start(0);
    
     }
-    var client = BinaryClient('ws://192.168.0.13:4703/audio-client');
+    var client = BinaryClient('ws://localhost:4703/audio-client');
     console.log("OK");
     client.on('stream', function (stream) {
                   soundController.nextTime = 0;
@@ -131,6 +133,16 @@
                     soundController.nextTime+=source.buffer.duration;  
                   }
                 };
+
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
     </script>
 
 </head>
