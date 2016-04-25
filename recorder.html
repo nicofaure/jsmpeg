@@ -4,7 +4,7 @@
     <head>
         <title>Stream</title>
         <script src="https://cdn.jsdelivr.net/binaryjs/0.2.1/binary.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.7.1/modernizr.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.7.1/modernizr.min.js"></script>
         <script type="text/javascript">
             (function (document) {
 
@@ -17,6 +17,8 @@
                     videoSocketSrv: 'ws://localhost:4705/video-server'
                 };
 
+                var channel = getParameterByName('channel');
+
                 var senderEl = document.getElementById('sender');
                 var receiverEl = document.getElementById('receiver');
                 var videoEl = document.getElementById('video');
@@ -28,7 +30,7 @@
                 var receiverPos = 0;
                 var transferRate = Math.round(((1000 / settings.grabRate) * receiverDataLength / 1024), 2);
 
-                var videoServer = new BinaryClient(settings.videoSocketSrv);
+                var videoClient = new BinaryClient(settings.videoSocketSrv);
                 var stream;
 
                 var imageFrame = receiverContext.getImageData(0, 0, settings.canvasWidth, settings.canvasHeight);
@@ -51,9 +53,9 @@
                 document.getElementById('message').innerHTML = 'Sending: ' + transferRate + ' KB / Sec<br />';
                 document.getElementById('message').innerHTML += 'Receiving: ' + transferRate + ' KB / Sec';
 
-                videoServer.on('open', function (s) {
+                videoClient.on('open', function (s) {
                     console.log("socket open");
-                    stream = videoServer.createStream(s, 'toserver');
+                    stream = videoClient.createStream(channel);
                 });
 
                 // gets called in an certain interval and grabs the current video frame
@@ -68,7 +70,7 @@
                     }else{
                         console.log("algo paso");
                     }
-                    setTimeout(grabLoop, 180);
+                    setTimeout(grabLoop, 200);
                 };
 
                 // gets called as soon we have access to the camera..
@@ -77,7 +79,7 @@
                     videoEl.src = window.URL.createObjectURL(stream);
                     videoEl.play();
                     console.log('success');
-                    setTimeout(grabLoop, 180);
+                    setTimeout(grabLoop, 200);
                 };
 
                 // no camera access...
@@ -90,6 +92,16 @@
             });
 
         })(document);
+
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
         </script>
     </head>
     <body>
