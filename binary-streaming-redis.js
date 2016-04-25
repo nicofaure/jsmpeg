@@ -52,14 +52,14 @@ videoServer.on('connection', function(client){
 videoClient.on('connection', function(client) {
   var channelName = getChannelNameFromUrl(client._socket.upgradeReq.url);
   if(videoBuffers[channelName+':video'] !== undefined){
-    videoBuffers[channelName+':video'].push(client.createStream('fromserver'));
+    videoBuffers[channelName+':video'].push(client);
   }
 
   videoSubscriber.on("message", function(channel, data) {
     for(var i = 0;i < videoBuffers[channel].length;i++){
-      //var responseStream = videoBuffers[channel][i].createStream('fromserver');
+      var responseStream = videoBuffers[channel][i].createStream('fromserver');
       var bufferStream = new Stream();
-      bufferStream.pipe(videoBuffers[channel][i]);
+      bufferStream.pipe(responseStream);
       bufferStream.emit('data',new Buffer(data,'base64'));
     }
   }); 
@@ -89,14 +89,14 @@ audioClient.on('connection', function(client){
   console.log(">>>Incoming audio client");
   var channelName = getChannelNameFromUrl(client._socket.upgradeReq.url);
   if(audioBuffers[channelName+':audio'] !== undefined){
-    var responseStream = client.createStream('fromserver');
-    var bufferStream = new Stream();
-    bufferStream.pipe(responseStream);
-    audioBuffers[channelName+':audio'].push(bufferStream);
+    audioBuffers[channelName+':audio'].push(client);
   }
   audioSubscriber.on("message", function(channel, data) {
     for(var i = 0;i < audioBuffers[channel].length;i++){
-      audioBuffers[channel][i].emit('data',new Buffer(data,'base64'));
+      var responseStream = audioBuffers[channel][i].createStream('fromserver');
+      var bufferStream = new Stream();
+      bufferStream.pipe(responseStream);
+      bufferStream.emit('data',new Buffer(data,'base64'));
     }
   }); 
 
