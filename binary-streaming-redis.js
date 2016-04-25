@@ -54,17 +54,28 @@ videoClient.on('connection', function(client) {
   if(videoBuffers[channelName+':video'] !== undefined){
     videoBuffers[channelName+':video'].push(client);
   }
+});
 
-  videoSubscriber.on("message", function(channel, data) {
-    for(var i = 0;i < videoBuffers[channel].length;i++){
+videoSubscriber.on("message", function(channel, data) {
+  var deletedClients = [];
+  var mybuffer = new Buffer(data,'base64');
+
+  for(var i = 0;i < videoBuffers[channel].length;i++) {
+    try {
       var responseStream = videoBuffers[channel][i].createStream('fromserver');
       var bufferStream = new Stream();
       bufferStream.pipe(responseStream);
-      bufferStream.emit('data',new Buffer(data,'base64'));
+      bufferStream.emit('data',mybuffer);
+    } catch(e) {
+      videoBuffers[channel][i].close();
+      deletedClients.push(i);
     }
-  }); 
-});
+  }
 
+  for(index in deletedClients){
+    videoBuffers[channel].splice(deletedClients[index],1);
+  }
+}); 
 
 audioServer.on('connection', function(client){
   console.log('Binary Server connection started');
@@ -91,16 +102,17 @@ audioClient.on('connection', function(client){
   if(audioBuffers[channelName+':audio'] !== undefined){
     audioBuffers[channelName+':audio'].push(client);
   }
-  audioSubscriber.on("message", function(channel, data) {
-    for(var i = 0;i < audioBuffers[channel].length;i++){
-      var responseStream = audioBuffers[channel][i].createStream('fromserver');
-      var bufferStream = new Stream();
-      bufferStream.pipe(responseStream);
-      bufferStream.emit('data',new Buffer(data,'base64'));
-    }
-  }); 
-
 });
+
+audioSubscriber.on("message", function(channel, data) {
+  var mybuffer = new Buffer(data,'base64');
+  for(var i = 0;i < audioBuffers[channel].length;i++){
+    var responseStream = audioBuffers[channel][i].createStream('fromserver');
+    var bufferStream = new Stream();
+    bufferStream.pipe(responseStream);
+    bufferStream.emit('data',mybuffer);
+  }
+}); 
 
 server.get('/recorder',function(req,res){
     res.sendFile(__dirname + '/recorder.html');

@@ -14,7 +14,7 @@
                     grabRate: 66.7,
                     canvasWidth: 200,
                     canvasHeight: 160,
-                    videoSocketClient: 'ws://10.10.33.193:4706/video-client'
+                    videoSocketClient: 'ws://10.10.32.49:4706/video-client'
                 };
 
                 var channel = getParameterByName('channel');
@@ -97,7 +97,7 @@
         node.start(0);
    
     }
-    var client = BinaryClient('ws://10.10.33.193:4703/audio-client?channel=' + channel);
+    var client = BinaryClient('ws://10.10.32.49:4703/audio-client?channel=' + channel);
 
     console.log("OK");
     client.on('stream', function (stream) {
