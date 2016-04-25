@@ -14,7 +14,7 @@
                     grabRate: 1000/30,
                     canvasWidth: 400,
                     canvasHeight: 320,
-                    videoSocketClient: 'ws://192.168.0.13:4706/video-client'
+                    videoSocketClient: 'ws://10.10.33.193:4706/video-client'
                 };
 
                 var senderEl = document.getElementById('sender');
@@ -95,7 +95,7 @@
         node.start(0);
    
     }
-    var client = BinaryClient('ws://192.168.0.13:4703/audio-client');
+    var client = BinaryClient('ws://10.10.33.193:4703/audio-client');
     console.log("OK");
     client.on('stream', function (stream) {
                   soundController.nextTime = 0;
