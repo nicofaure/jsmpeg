@@ -11,9 +11,9 @@
             document.addEventListener('DOMContentLoaded', function () {
 
                 var settings = {
-                    grabRate: 1,
-                    canvasWidth: 400,
-                    canvasHeight: 320,
+                    grabRate: 66.7,
+                    canvasWidth: 200,
+                    canvasHeight: 160,
                     videoSocketSrv: 'ws://localhost:4705/video-server'
                 };
 
@@ -70,7 +70,7 @@
                     }else{
                         console.log("algo paso");
                     }
-                    setTimeout(grabLoop, 200);
+                    setTimeout(grabLoop, settings.grabRate);
                 };
 
                 // gets called as soon we have access to the camera..
@@ -79,7 +79,7 @@
                     videoEl.src = window.URL.createObjectURL(stream);
                     videoEl.play();
                     console.log('success');
-                    setTimeout(grabLoop, 200);
+                    setTimeout(grabLoop, settings.grabRate);
                 };
 
                 // no camera access...
@@ -106,7 +106,7 @@
     </head>
     <body>
     <h1>RECORDER</h1>
-        <button onclick="startRecording()">Start Recording</button><button onclick="stopRecording()">Stop Recording</button><script src="public/recorder.js"></script>
+        <button onclick="startRecording()">Start Recording</button><button onclick="stopRecording()">Stop Recording</button><script src="recorder.js"></script>
 
 <canvas id="sender"></canvas>
 <canvas id="receiver"></canvas>

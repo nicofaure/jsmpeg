@@ -18,7 +18,7 @@ var audioSubscriber = redis.createClient();
 var videoPublisher = redis.createClient();
 var videoSubscriber = redis.createClient();
 
-var SERVER_PORT = 3701;
+var SERVER_PORT = 8000;
 
 var videoBuffers = {};
 var audioBuffers = {};
@@ -100,6 +100,18 @@ audioClient.on('connection', function(client){
     }
   }); 
 
+});
+
+server.get('/recorder',function(req,res){
+    res.sendFile(__dirname + '/recorder.html');
+});
+
+server.get('/recorder.js',function(req,res){
+    res.sendFile(__dirname + '/recorder.js');
+});
+
+server.get('/video',function(req,res){
+    res.sendFile(__dirname + '/video.html');
 });
 
 server.listen(SERVER_PORT);
