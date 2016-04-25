@@ -35,8 +35,8 @@ videoServer.on('connection', function(client){
   client.on('stream', function(stream, channelName) {
     console.log('>>>Incoming Video stream');
     stream.on("data",function(chunk){
-      if(videoBuffers[channelName] === undefined){
-        videoBuffers[channelName] = [];
+      if(videoBuffers[channelName+':video'] === undefined){
+        videoBuffers[channelName+':video'] = [];
         videoSubscriber.subscribe(channelName+ ":video");
       }
       videoPublisher.publish(channelName + ":video",chunk.toString('base64'));
@@ -51,8 +51,8 @@ videoServer.on('connection', function(client){
 //GET VIDEO FROM REDIS AND EMIT TO CLIENT BROWSER
 videoClient.on('connection', function(client) {
   var channelName = getChannelNameFromUrl(client._socket.upgradeReq.url);
-  if(videoBuffers[channelName] !== undefined){
-    videoBuffers[channelName].push(client.createStream('fromserver'));
+  if(videoBuffers[channelName+':video'] !== undefined){
+    videoBuffers[channelName+':video'].push(client.createStream('fromserver'));
   }
 
   videoSubscriber.on("message", function(channel, data) {
@@ -72,8 +72,8 @@ audioServer.on('connection', function(client){
   client.on('stream', function(stream, channelName) {
     console.log('>>>Incoming audio stream');
     stream.on("data",function(chunk){
-      if(audioBuffers[channelName] === undefined){
-        audioBuffers[channelName] = [];
+      if(audioBuffers[channelName+':audio'] === undefined){
+        audioBuffers[channelName+':audio'] = [];
         audioSubscriber.subscribe(channelName + ':audio');
       }
       audioPublisher.publish(channelName + ':audio',chunk.toString('base64'));
@@ -88,11 +88,11 @@ audioServer.on('connection', function(client){
 audioClient.on('connection', function(client){
   console.log(">>>Incoming audio client");
   var channelName = getChannelNameFromUrl(client._socket.upgradeReq.url);
-  if(audioBuffers[channelName] !== undefined){
+  if(audioBuffers[channelName+':audio'] !== undefined){
     var responseStream = client.createStream('fromserver');
     var bufferStream = new Stream();
     bufferStream.pipe(responseStream);
-    audioBuffers[channelName].push(bufferStream);
+    audioBuffers[channelName+':audio'].push(bufferStream);
   }
   audioSubscriber.on("message", function(channel, data) {
     for(var i = 0;i < audioBuffers[channel].length;i++){
