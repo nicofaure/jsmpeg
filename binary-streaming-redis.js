@@ -50,21 +50,23 @@ videoServer.on('connection', function(client){
 
 //GET VIDEO FROM REDIS AND EMIT TO CLIENT BROWSER
 videoClient.on('connection', function(client) {
+
   var channelName = getChannelNameFromUrl(client._socket.upgradeReq.url);
   if(videoBuffers[channelName+':video'] !== undefined){
-    videoBuffers[channelName+':video'].push(client);
+    console.log(">>>Incoming audio client. Connected: " + videoBuffers[channelName+':video'].length);
+    var responseStream = client.createStream('fromserver');
+    var bufferStream = new Stream();
+    bufferStream.pipe(responseStream);
+    videoBuffers[channelName+':video'].push(bufferStream);
   }
 });
 
 videoSubscriber.on("message", function(channel, data) {
   var deletedClients = [];
   var mybuffer = new Buffer(data,'base64');
-
   for(var i = 0;i < videoBuffers[channel].length;i++) {
     try {
-      var responseStream = videoBuffers[channel][i].createStream('fromserver');
-      var bufferStream = new Stream();
-      bufferStream.pipe(responseStream);
+      var bufferStream = videoBuffers[channel][i];
       bufferStream.emit('data',mybuffer);
     } catch(e) {
       videoBuffers[channel][i].close();
@@ -106,11 +108,21 @@ audioClient.on('connection', function(client){
 
 audioSubscriber.on("message", function(channel, data) {
   var mybuffer = new Buffer(data,'base64');
-  for(var i = 0;i < audioBuffers[channel].length;i++){
-    var responseStream = audioBuffers[channel][i].createStream('fromserver');
-    var bufferStream = new Stream();
-    bufferStream.pipe(responseStream);
-    bufferStream.emit('data',mybuffer);
+  var deletedClients = [];
+  try{
+    for(var i = 0;i < audioBuffers[channel].length;i++){
+      var responseStream = audioBuffers[channel][i].createStream('fromserver');
+      var bufferStream = new Stream();
+      bufferStream.pipe(responseStream);
+      bufferStream.emit('data',mybuffer);
+    }
+  }catch(e){
+      audioBuffers[channel][i].close();
+      deletedClients.push(i);    
+  }
+
+  for(index in deletedClients){
+    audioBuffers[channel].splice(deletedClients[index],1);
   }
 }); 
 

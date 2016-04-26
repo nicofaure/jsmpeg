@@ -14,10 +14,11 @@
                     grabRate: 66.7,
                     canvasWidth: 200,
                     canvasHeight: 160,
-                    videoSocketClient: 'ws://10.10.32.49:4706/video-client'
+                    videoSocketClient: 'ws://10.11.8.159:4706/video-client'
                 };
 
-                var channel = getParameterByName('channel');
+                //var channel = getParameterByName('channel');
+                var channel = 'golza';
 
                 var senderEl = document.getElementById('sender');
                 var receiverEl = document.getElementById('receiver');
@@ -80,12 +81,12 @@
     var soundController = context;
 
 
-    function testSound(buff) {
+    function playSound(buff) {
         var node = context.createBufferSource()
-            , buffer = context.createBuffer(1, 4096, context.sampleRate)
+            , buffer = context.createBuffer(4, 16384, context.sampleRate)
             , data = buffer.getChannelData(0);
         var src = context.createBufferSource();
-        src.buffer = context.createBuffer(1, buff.byteLength, context.sampleRate)
+        src.buffer = context.createBuffer(4, buff.byteLength, context.sampleRate)
         src.connect(context.destination);
         node.buffer = buffer;
         node.loop = false;
@@ -97,7 +98,7 @@
         node.start(0);
    
     }
-    var client = BinaryClient('ws://10.10.32.49:4703/audio-client?channel=' + channel);
+    var client = BinaryClient('ws://10.11.8.159:4703/audio-client?channel=golza');
 
     console.log("OK");
     client.on('stream', function (stream) {
@@ -110,7 +111,7 @@
                   stream.on('data', function (data) {
                     var array = new Float32Array(data);
                     console.log("LLEGO!");
-                    testSound(array);
+                    playSound(array);
                   });
 
                   stream.on('end', function () {
@@ -119,21 +120,6 @@
 
                 });
 
-                soundController.playCache = function (cache) {
-                  while (cache.length) {
-                    var buffer = cache.shift();
-                    var source    = soundController.createBufferSource();
-                    source.buffer = buffer;
-                    source.connect(soundController.destination);
-                    if (soundController.nextTime == 0) {
-                        // add a delay of 0.05 seconds
-                        soundController.nextTime = soundController.currentTime + 0.05;  
-                    }
-                    source.start(soundController.nextTime);
-                    // schedule buffers to be played consecutively
-                    soundController.nextTime+=source.buffer.duration;  
-                  }
-                };
 
     function getParameterByName(name, url) {
         if (!url) url = window.location.href;

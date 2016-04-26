@@ -34,50 +34,20 @@
       // the sample rate is in context.sampleRate
       audioInput = context.createMediaStreamSource(e);
 
-      var bufferSize = 4096;
-      recorder = context.createScriptProcessor(bufferSize, 2, 2);
+      var bufferSize = 16384;
+      recorder = context.createScriptProcessor(bufferSize, 4, 4);
 
       recorder.onaudioprocess = function(e){
         if(!recording) return;
         
         var left = e.inputBuffer.getChannelData(0);
         console.log(left);
-        //ws.send(bufferAsString);
         window.Stream.write(left);
-
-        //testSound(left);
       }
-
-      function testSound(buff) {
-        console.log(buff);
-        var node = context.createBufferSource()
-            , buffer = context.createBuffer(1, bufferSize, context.sampleRate)
-            , data = buffer.getChannelData(0);
-        var src = context.createBufferSource();
-        src.buffer = context.createBuffer(1, buff.byteLength, context.sampleRate)
-        src.connect(context.destination);
-        node.buffer = buffer;
-        node.loop = false;
-        for (var i = 0; i < buff.byteLength; i++) {
-                data[i] = buff[i];
-        }
-
-        node.connect(context.destination);
-        node.start(0);
-   
-    }
 
       audioInput.connect(recorder)
       recorder.connect(context.destination); 
     }
 
-    function convertFloat32ToInt16(buffer) {
-      l = buffer.length;
-      buf = new Int16Array(l);
-      while (l--) {
-        buf[l] = Math.min(1, buffer[l])*0x7FFF;
-      }
-      return buf.buffer;
-    }
   });
 })(this);
