@@ -1,0 +1,25 @@
+{
+ "name": "jsmpeg",
+ "version": "1.0.0",
+ "description": "#### An MPEG1 Video Decoder in JavaScript ####",
+ "main": "binary-streaming-base64.js",
+ "scripts": {
+   "test": "echo \"Error: no test specified\" && exit 1"
+ },
+ "repository": {
+   "type": "git",
+   "url": "git+https://github.com/nicofaure/jsmpeg.git"
+ },
+ "author": "",
+ "license": "ISC",
+ "bugs": {
+   "url": "https://github.com/nicofaure/jsmpeg/issues"
+ },
+ "homepage": "https://github.com/nicofaure/jsmpeg#readme",
+ "dependencies": {
+   "base64-stream": "^0.1.3",
+   "binaryjs": "^0.2.1",
+   "express": "^4.13.4",
+   "redis": "^2.5.3"
+ }
+}
